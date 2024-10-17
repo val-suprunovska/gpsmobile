@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GPS Tracker</title>
+<script src="https://www.openlayers.org/en/v4.6.5/build/ol.js"></script>
+</head>
+<body>
+<div id="map" style="width: 100%; height: 400px;"></div>
+<script>
+// Функция для инициализации карты
+function initMap() {
+const map = new ol.Map({
+target: 'map',
+layers: [
+new ol.layer.Tile({
+source: new ol.source.OSM()
+})
+],
+view: new ol.View({
+center: ol.proj.fromLonLat([0, 0]),
+zoom: 2
+})
+});
+// Функция для обновления маркера с координатами
+function updateMarker(coordinates) {
+map.getView().setCenter(ol.proj.fromLonLat(coordinates));
+marker.setGeometry(new ol.geom.Point(ol.proj.fromLonLat(coordinates)));
+}
+// Получение координат GPS
+function getGPSLocation() {
+navigator.geolocation.getCurrentPosition(
+// Успешное получение координат
+function(position) {
+const coordinates = [position.coords.longitude, position.coords.latitude];
+updateMarker(coordinates);
+},
+// Ошибка при получении координат
+function(error) {
+console.error('Error getting GPS coordinates:', error);
+}
+);
+}
+// Обновление координат каждые 2 секунды
+setInterval(getGPSLocation, 2000);
+// Создание маркера
+const marker = new ol.Feature();
+marker.setStyle(new ol.style.Style({
+image: new ol.style.Circle({
+radius: 6,
+fill: new ol.style.Fill({color: 'red'}),
+stroke: new ol.style.Stroke({color: 'white', width: 2})
+})
+}));
+// Добавление маркера на карту
+const vectorLayer = new ol.layer.Vector({
+source: new ol.source.Vector({
+features: [marker]
+})
+});
+map.addLayer(vectorLayer);
+}
+// Загрузка карты при загрузке страницы
+document.addEventListener('DOMContentLoaded', initMap);
+</script>
+</body>
+</html>
